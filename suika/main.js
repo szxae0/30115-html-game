@@ -13,10 +13,13 @@ const render = Render.create({
     engine,
     //어디에 그릴 것 인지 -> body 생성
     element: document.body,
-    option: {
+    options: {
         wireframes: false,   //기본값은 true인데 true일 경 색 적용 x
-        backgroun: '#F7F4C8',
+        backgroun: '#F7F4C8',  //배경 색 지정
         width: 620,
         height: 850,
     },
 });
+
+Render.run(render);
+Runner.run(engine);
