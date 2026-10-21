@@ -58,18 +58,27 @@ World.add(world, [leftwall, rightwall, ground, topLine]);
 Render.run(render);
 Runner.run(engine);
 
-// 과일 떨어지는 함수
+//현재 과일값을 저장할 수 있는 변수
+let currentBody = null;
+let currentFruit = null;
 
+// 과일 떨어지는 함수
 function addFruit() {
-    const index = 1;
+    const index = Math.floor(math.random() * 5);
     const fruit = FRUITS[index];
 
     const body = Bodies.circle(300, 50, fruit.radius, {
         index: index,   // 인덱스 값 저장
+        isSleeping : true, // 시작시 바로 떨어지는게 아니라 멈춤 상태
         render: {
             sprite: { texture: `${fruit.name}.png`},
-        }
+        },
+        restitution: 0.5, 
     })
+
+    // 현재 과일 값을 저장
+    currentBody = boddy
+    currentFruit =  fruit;
 
     // 월드에 추가
     World.add(world, body)
