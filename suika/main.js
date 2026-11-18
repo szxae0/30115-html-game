@@ -49,7 +49,7 @@ const ground = Bodies.rectangle(310, 820, 620, 60, {
 })
 
 const topline = Bodies.rectangle(310, 150, 620 , 2, {
-
+    name : "topLine",
     isStatic: true,
     isSensor: true,
     render: {fillStyle: '#E6B143'}
@@ -67,6 +67,7 @@ let currentBody = null;
 let currentFruit = null;
 //키 조작을 제어하는 변수 생성
 let disableAction = false;
+let interval = null;
 
 
 function addFruit() {
@@ -92,42 +93,62 @@ function addFruit() {
         World.add(world, body)
 }
 
-//키보드 입력 받기
+// 키보드 입력 받기
 window.onkeydown = (event) => {
-    //제어 조작 변수가 true일 경우 바로 리턴
     if (disableAction)
         return;
 
-
-    switch(event.code) {
+    switch (event.code) {
         case "KeyA":
-            Body.setPosition(currentBody, {
-                x: currentBody.position.x -10,
-                y: currentBody.position.y
-            });
-            break;
-        case "KeyD":
-            Body.setPosition(currentBody, {
-                x: currentBody.position.x +10,
-                y: currentBody.position.y
-            });
+            if (interval)
+                return;
+
+            interval = setInterval(() => {
+                if (currentBody.position.x - currentFruit.radius > 30) {
+                    Body.setPosition(currentBody, {
+                        x: currentBody.position.x - 1,
+                        y: currentBody.position.y
+                    });
+                }
+            }, 5);
             break;
 
-        //과일 떨어트리기
+        case "KeyD":
+            if (interval)
+                return;
+
+            interval = setInterval(() => {
+                if (currentBody.position.x + currentFruit.radius < 590) {
+                    Body.setPosition(currentBody, {
+                        x: currentBody.position.x + 1,
+                        y: currentBody.position.y
+                    });
+                }
+            }, 5);
+            break;
+
+        // 과일 떨어트리기
         case "KeyS":
             currentBody.isSleeping = false;
             disableAction = true;
-            
+
             setTimeout(() => {
-                //새로운 과일 추가
                 addFruit();
                 disableAction = false;
             }, 1000);
             break;
-
     }
-}
+};
 
+window.onkeyup = (event) => {
+    switch (event.code) {
+        case "KeyA":
+        case "KeyD":
+            clearInterval(interval);
+            interval = null;
+            break;
+    }
+};
 //이벤트 사용
 Events.on(engine, "collisionStart", (event) =>{
     //콜리전 이벤트 발생시 생기는 모든 오브젝트를 비교
@@ -135,6 +156,9 @@ Events.on(engine, "collisionStart", (event) =>{
         //기존 과일의 index를 저장
         const index = collision.bodyA.index;
 
+        //수박일 경우 처리하지 않음
+        if (index === FRUITS.lenght - 1)
+        return;
 
         //같은 과일일 경우
         if (collision.bodyA.index == collision.bodyB.index) {
@@ -153,7 +177,20 @@ Events.on(engine, "collisionStart", (event) =>{
                     render : {sprite: {texture: `${newFruit.name}.png`}}
             })
 
-            World.add(world, newBody)
+            World.add(world, newBody);
+
+            if(newBody.index === FRUITS.lenght - 1)
+        {
+            setTimeout (() => {
+                alert("You made watermelon!")
+                disableAction = true;
+        })
+    }
+        }
+
+        //게임 종료 조건
+        if (!disableAction && (collision.bodyA.name === "topLine" || collision.bodyB.name === "topLine")) {
+            alert("Game Over");
         }
 })
 
